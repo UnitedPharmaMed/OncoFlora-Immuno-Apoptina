@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OncoFlora Immuno-Apoptina® | Analisi Interattiva</title>
+    
+    <!-- Chosen Palette: Natural Harmony (Warm Neutrals with Green and Blue Accents) -->
+    <!-- Application Structure Plan: A single-page dashboard design with a fixed navigation bar for smooth scrolling. The structure is thematic, not linear, to improve usability. It starts with a high-level introduction, then dives into an interactive 'Plant Explorer' using tabs for detailed information on each plant. This is followed by a 'Synergy' section with an interactive diagram and a 'Data Visualization' section with dynamic charts to compare mechanisms and compound classes. This structure was chosen to transform the dense report into an exploratory experience, allowing users to compare, contrast, and synthesize information non-linerarly, which is more effective for understanding complex relationships than a simple page-by-page report. -->
+    <!-- Visualization & Content Choices: 
+        - Plant Explorer (Tabs): Goal: Organize/Compare. Method: HTML/CSS/JS tabs. Interaction: Click to switch content. Justification: Allows easy comparison between the three plants without overwhelming the user.
+        - Synergy Diagram: Goal: Organize/Relationships. Method: HTML/CSS Flexbox diagram. Interaction: Hover effects (future enhancement) and clear visual flow. Justification: Simplifies the core concept of how the plants work together.
+        - Mechanisms Chart (Radar): Goal: Compare. Method: Chart.js Canvas. Interaction: Tooltips on hover. Justification: Visually represents and compares the qualitative strengths of each plant across key anti-cancer mechanisms, making complex data easily digestible.
+        - Compound Classes Chart (Doughnut): Goal: Inform/Organize. Method: Chart.js Canvas. Interaction: Click on a segment to filter a list below. Justification: Provides a quick overview of the phytochemical landscape and allows interactive exploration of key compounds.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #1e40af; /* Deep Blue */
+            border-bottom-color: #1e40af;
+        }
+        .tab-button {
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #1e3a8a;
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 600px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#hero" class="text-xl font-bold text-blue-900">OncoFlora Immuno-Apoptina®</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#explorer" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Le Piante</a>
+                    <a href="#synergy" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Sinergia</a>
+                    <a href="#visuals" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Visualizzazioni</a>
+                    <a href="#research" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Ricerca Futura</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+
+        <!-- Hero Section -->
+        <section id="hero" class="text-center py-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-blue-900 mb-4">Un Approccio Integrato alla Terapia Oncologica</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                Esplorazione interattiva del potenziale sinergico di <span class="font-semibold text-green-700">Vinca majus</span>, <span class="font-semibold text-yellow-700">Artemisia maritima</span> e <span class="font-semibold text-purple-700">Taraxacum officinale</span> per sviluppare un composto farmacologico naturale multi-target.
+            </p>
+            <p class="text-md md:text-lg text-gray-700 mt-4 font-medium">
+                By United PharmaMed S.L.
+            </p>
+        </section>
+
+        <!-- Plant Explorer Section -->
+        <section id="explorer" class="py-16 bg-white rounded-2xl shadow-lg">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Esplora le Piante Fondamentali</h2>
+                <p class="text-gray-600 mt-2">Seleziona una pianta per scoprire il suo profilo fitochimico, i meccanismi d'azione e il contributo unico.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div id="tabs-container" class="flex justify-center space-x-2 md:space-x-4 mb-8 flex-wrap gap-y-2">
+                <button data-plant="vinca" class="tab-button text-sm md:text-base font-medium py-2 px-4 rounded-full bg-white shadow-md active">🌿 Vinca majus</button>
+                <button data-plant="artemisia" class="tab-button text-sm md:text-base font-medium py-2 px-4 rounded-full bg-white shadow-md">🌼 Artemisia maritima</button>
+                <button data-plant="taraxacum" class="tab-button text-sm md:text-base font-medium py-2 px-4 rounded-full bg-white shadow-md">🌸 Taraxacum officinale</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tab-content" class="px-4 md:px-8">
+                <!-- Content will be injected by JS -->
+            </div>
+        </section>
+
+        <!-- Synergy Section -->
+        <section id="synergy" class="py-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">La Potenza della Sinergia</h2>
+                <p class="text-gray-600 mt-2">Come i componenti delle tre piante lavorano insieme per un effetto potenziato.</p>
+            </div>
+            <div class="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <!-- Plants -->
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center text-3xl">🌿</div>
+                            <p class="font-semibold mt-2">Vinca majus</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-yellow-100 rounded-full mx-auto flex items-center justify-center text-3xl">🌼</div>
+                            <p class="font-semibold mt-2">A. maritima</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-purple-100 rounded-full mx-auto flex items-center justify-center text-3xl">🌸</div>
+                            <p class="font-semibold mt-2">T. officinale</p>
+                        </div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="text-4xl text-blue-400 transform rotate-90 md:rotate-0">→</div>
+                    <!-- Synergistic Effects -->
+                    <div class="grid grid-cols-2 gap-4 text-left">
+                        <div class="bg-blue-50 p-3 rounded-lg"><strong class="text-blue-800">Apoptosi Potenziata:</strong> Attacco multi-via alle cellule tumorali.</div>
+                        <div class="bg-blue-50 p-3 rounded-lg"><strong class="text-blue-800">Supporto Immunitario:</strong> Modulazione del microambiente tumorale.</div>
+                        <div class="bg-blue-50 p-3 rounded-lg"><strong class="text-blue-800">Miglior Targeting:</strong> Superamento delle barriere e della resistenza.</div>
+                        <div class="bg-blue-50 p-3 rounded-lg"><strong class="text-blue-800">Tossicità Ridotta:</strong> Azione selettiva e neuroprotezione.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Visualizations Section -->
+        <section id="visuals" class="py-16 bg-white rounded-2xl shadow-lg">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Dati a Colpo d'Occhio</h2>
+                <p class="text-gray-600 mt-2">Confronti visivi dei meccanismi d'azione e dei composti chiave.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 px-4">
+                <div>
+                    <h3 class="text-xl font-semibold text-center mb-4">Confronto dei Meccanismi Anti-Cancro</h3>
+                    <div class="chart-container">
+                        <canvas id="mechanismsChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center">Questo grafico radar confronta qualitativamente l'enfasi del report sui meccanismi d'azione di ciascuna pianta (punteggio basato sulla trattazione nel testo).</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-center mb-4">Classi di Composti Bioattivi</h3>
+                    <div class="chart-container" style="max-width: 350px;">
+                        <canvas id="compoundsChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4 text-center">Clicca su una sezione per vedere esempi di composti. Questa è una rappresentazione delle principali classi menzionate nel report.</p>
+                    <div id="compound-list" class="mt-4 p-4 bg-gray-100 rounded-lg min-h-[100px]">
+                        <p class="text-gray-600">Seleziona una classe dal grafico...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Future Research Section -->
+        <section id="research" class="py-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Il Percorso Futuro</h2>
+                <p class="text-gray-600 mt-2">Le principali lacune di ricerca da colmare per la traslazione clinica.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Studi Clinici</h3>
+                    <p class="text-gray-600">Necessità critica di studi *in vivo* e trial clinici rigorosi sull'uomo per validare sicurezza ed efficacia.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Standardizzazione</h3>
+                    <p class="text-gray-600">Sviluppo di protocolli di estrazione e controllo qualità per garantire una composizione fitochimica coerente.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Formulazioni Avanzate</h3>
+                    <p class="text-gray-600">Ricerca su sistemi di consegna (es. nanovettori) per migliorare la biodisponibilità e il targeting tumorale.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Interazioni e Resistenza</h3>
+                    <p class="text-gray-600">Indagine approfondita sulle interazioni farmacologiche e sui potenziali meccanismi di resistenza.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="mb-2">Applicazione Interattiva basata sulla ricerca "Sviluppo di un Composto Farmacologico Naturale Multi-Target per la Terapia Oncologica".</p>
+            <p class="text-sm text-gray-400">Disclaimer: Questa applicazione presenta un quadro concettuale a scopo informativo basato sulla letteratura scientifica. Non è intesa come consiglio medico. Qualsiasi applicazione terapeutica di composti derivati da piante dovrebbe essere condotta sotto stretta supervisione scientifica e guida medica professionale.</p>
+            <p class="text-sm text-gray-400 mt-2">www.unitedpharmamed.com</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA ---
+            const plantData = {
+                vinca: {
+                    name: "Vinca majus (Pervinca maggiore)",
+                    color: "rgba(34, 139, 34, 0.2)",
+                    borderColor: "rgba(34, 139, 34, 1)",
+                    content: `
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <h4 class="font-bold text-lg mb-2">Profilo e Meccanismi</h4>
+                                <p class="mb-4">Contiene alcaloidi, flavonoidi e composti fenolici. Gli estratti mostrano attività citotossica dose-dipendente. Il suo alcaloide chiave, la <strong>Vincamina</strong>, ha attività antiproliferativa e anti-apoptotica, oltre a un'importante azione neuroprotettiva.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Induzione Apoptosi:</strong> Il suo derivato, la vinpocetina, mostra attività anti-apoptotica.</li>
+                                    <li><strong>Attività Antiproliferativa:</strong> Contribuisce a inibire la crescita tumorale.</li>
+                                    <li><strong>Neuroprotezione:</strong> Proprietà uniche che possono mitigare la tossicità di altre terapie, supportando la salute generale del paziente.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2">Contributo Unico</h4>
+                                <p class="text-green-800">✨ <strong>Supporto all'Ospite e Neuroprotezione</strong>. Le sue proprietà antiossidanti e neuroprotettive potrebbero mitigare gli effetti collaterali, migliorando la tolleranza al trattamento.</p>
+                                <p class="mt-4 text-sm text-red-700 italic"><strong>Nota:</strong> Da non confondere con la *Catharanthus roseus*, fonte dei potenti alcaloidi Vinca usati in chemioterapia (Vincristina, Vinblastina).</p>
+                            </div>
+                        </div>
+                    `
+                },
+                artemisia: {
+                    name: "Artemisia maritima (Assenzio marino)",
+                    color: "rgba(255, 193, 7, 0.2)",
+                    borderColor: "rgba(255, 193, 7, 1)",
+                    content: `
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <h4 class="font-bold text-lg mb-2">Profilo e Meccanismi</h4>
+                                <p class="mb-4">Ricca di lattoni sesquiterpenici (SLs) e monoterpeni. I suoi estratti inducono apoptosi, arresto del ciclo cellulare (G2/M) e inibizione della migrazione cellulare.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Induzione Apoptosi:</strong> Gli SLs come l'<strong>Artemisinina</strong> generano ROS (specie reattive dell'ossigeno) ferro-dipendenti nelle cellule tumorali, attivando la via mitocondriale dell'apoptosi.</li>
+                                    <li><strong>Arresto Ciclo Cellulare:</strong> Blocca le cellule tumorali nella fase G2/M, impedendone la divisione.</li>
+                                    <li><strong>Modulazione Immunitaria:</strong> I derivati dell'artemisinina (ARTs) possono modulare la risposta immunitaria.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2">Contributo Unico</h4>
+                                <p class="text-yellow-800">🚀 <strong>Miglioramento della Consegna e Superamento della Resistenza</strong>. Il monoterpene <strong>Borneolo</strong> aumenta la penetrazione dei farmaci attraverso barriere biologiche (inclusa la barriera emato-encefalica) e inibisce le pompe di efflusso, combattendo la resistenza multi-farmaco.</p>
+                            </div>
+                        </div>
+                    `
+                },
+                taraxacum: {
+                    name: "Taraxacum officinale (Tarassaco)",
+                    color: "rgba(128, 0, 128, 0.2)",
+                    borderColor: "rgba(128, 0, 128, 1)",
+                    content: `
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <h4 class="font-bold text-lg mb-2">Profilo e Meccanismi</h4>
+                                <p class="mb-4">Composizione fitochimica estremamente ricca e diversificata (polifenoli, steroli, carotenoidi). Induce apoptosi attraverso molteplici vie, arresta il ciclo cellulare e modula le vie di segnalazione chiave.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Apoptosi Multi-via:</strong> Attiva sia la via estrinseca (recettori di morte TRAIL) che intrinseca (mitocondriale), rendendo difficile per le cellule tumorali eludere la morte.</li>
+                                    <li><strong>Attività ad Ampio Spettro:</strong> Efficace contro un'ampia gamma di tipi di cancro (leucemia, melanoma, pancreas, colon, etc.).</li>
+                                    <li><strong>Supporto Immunitario:</strong> Le sue proprietà antiossidanti e antinfiammatorie, insieme a composti come il beta-carotene, supportano direttamente e indirettamente il sistema immunitario.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-lg mb-2">Contributo Unico</h4>
+                                <p class="text-purple-800">🎯 <strong>Citotossicità Selettiva</strong>. La sua capacità di uccidere le cellule tumorali risparmiando quelle sane è un vantaggio critico, promettendo un profilo di tossicità più favorevole rispetto alle chemioterapie convenzionali.</p>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+
+            const compoundData = {
+                "Lattoni Sesquiterpenici": "Artemisinina, Santonina, Vulgarina",
+                "Monoterpeni": "Borneolo, Bornil Acetato, 1,8-Cineolo",
+                "Alcaloidi": "Vincamina",
+                "Polifenoli": "Acido cicorico, Luteolina, Quercetina",
+                "Steroli e Carotenoidi": "Taraxasterolo, Beta-carotene"
+            };
+
+            // --- TABS LOGIC ---
+            const tabsContainer = document.getElementById('tabs-container');
+            const tabContent = document.getElementById('tab-content');
+
+            function updateTabContent(plantId) {
+                const plant = plantData[plantId];
+                if (plant) {
+                    tabContent.innerHTML = plant.content;
+                }
+            }
+
+            tabsContainer.addEventListener('click', (e) => {
+                const targetButton = e.target.closest('button');
+                if (!targetButton) return;
+                
+                const plantId = targetButton.dataset.plant;
+
+                // Update active styles
+                tabsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                targetButton.classList.add('active');
+
+                // Update content
+                updateTabContent(plantId);
+            });
+
+            // Initial load
+            updateTabContent('vinca');
+
+            // --- CHARTS LOGIC ---
+            // Radar Chart
+            const mechanismsCtx = document.getElementById('mechanismsChart').getContext('2d');
+            const mechanismsChart = new Chart(mechanismsCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Induzione Apoptosi', 'Arresto Ciclo Cellulare', 'Supporto Immunitario', 'Inibizione Migrazione', 'Azione Selettiva', 'Migliora Consegna'],
+                    datasets: [
+                        {
+                            label: 'Vinca majus',
+                            data: [2, 1, 2, 0, 1, 0],
+                            backgroundColor: 'rgba(34, 139, 34, 0.2)',
+                            borderColor: 'rgba(34, 139, 34, 1)',
+                            pointBackgroundColor: 'rgba(34, 139, 34, 1)'
+                        },
+                        {
+                            label: 'Artemisia maritima',
+                            data: [2, 2, 1, 2, 1, 3],
+                            backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            pointBackgroundColor: 'rgba(255, 193, 7, 1)'
+                        },
+                        {
+                            label: 'Taraxacum officinale',
+                            data: [3, 2, 2, 1, 3, 0],
+                            backgroundColor: 'rgba(128, 0, 128, 0.2)',
+                            borderColor: 'rgba(128, 0, 128, 1)',
+                            pointBackgroundColor: 'rgba(128, 0, 128, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 3,
+                            pointLabels: { font: { size: 10 } },
+                            ticks: { display: false, stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // Doughnut Chart
+            const compoundsCtx = document.getElementById('compoundsChart').getContext('2d');
+            const compoundsChart = new Chart(compoundsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(compoundData),
+                    datasets: [{
+                        label: 'Classi di Composti',
+                        data: [25, 20, 10, 25, 20], // Proportions for visual representation
+                        backgroundColor: [
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 15, font: { size: 10 } } }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const chartElement = elements[0];
+                            const label = compoundsChart.data.labels[chartElement.index];
+                            const compounds = compoundData[label];
+                            const compoundListEl = document.getElementById('compound-list');
+                            compoundListEl.innerHTML = `<h4 class="font-semibold text-gray-800">${label}</h4><p class="text-gray-600">${compounds}</p>`;
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
